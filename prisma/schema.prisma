@@ -19,6 +19,7 @@ model User {
   password String 
   role RoleEnum @default(USER)
   isBanned Boolean @default(false) @map("is_banned")
+  isEmailConfirm Boolean @default(false) @map("is_email_confirm")
 
   events UserEvents[]
 
