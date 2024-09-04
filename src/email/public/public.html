@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brick {action} - {email}</title>
+    <style>
+        body {
+            background-color: whitesmoke;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+        p {
+            font-size: 1.5vw;
+            color: #555E43;
+            margin: 10px 0;
+        }
+        a {
+            font-size: 1.5vw;
+            text-align: center;
+            color: #007BFF;
+            margin: 10px 0;
+            transition: all 0.3s ease-in-out;
+            text-decoration: none;
+            text-align: center;
+            width: 100%;
+        }
+        a:hover {
+            box-shadow: #007BFF 1px 2px 3px;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            
+            color: #444b36;
+        }
+        .grand-container{
+            height: 95vh;
+            display: flex;
+            align-items: center;
+            justify-items: center;
+        }
+    </style>
+</head>
+<body>
+    
+<div class="grand-container">
+    <div class="container">
+        <h1>Hello, {email}. You required a {action}.</h1>
+        <p>If you not required the {action}, then ignore this message</p>
+        <a href="{url}" style="display:inline-block;">->Click here to {action}<-</a>
+    </div>
+</div>
+
+
+</body>
+</html>

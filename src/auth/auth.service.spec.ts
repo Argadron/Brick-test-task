@@ -8,6 +8,7 @@ import { response } from 'express';
 import testPrisma from '../prisma.forTest'
 import { UserModule } from '../user/user.module';
 import 'dotenv/config'
+import { EmailModule } from '../email/email.module';
 
 const prisma = testPrisma()
 
@@ -22,7 +23,7 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [JwtModule.register({
         secret: "secret",
-      }), UserModule, ConfigModule.forRoot()],
+      }), UserModule, ConfigModule.forRoot(), EmailModule],
       providers: [AuthService, PrismaService, LocalStrategy],
     }).compile();
 

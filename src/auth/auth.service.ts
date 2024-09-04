@@ -7,13 +7,16 @@ import { AuthDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt'
 import { JwtUser } from './interfaces';
 import { UserService } from '../user/user.service';
+import { EmailService } from '../email/email.service';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
     constructor(private readonly prismaService: PrismaService,
                 private readonly userService: UserService,
                 private readonly jwtService: JwtService,
-                private readonly configService: ConfigService
+                private readonly configService: ConfigService,
+                private readonly emailService: EmailService
     ) {}
 
     private async generateTokens(userId: number) {
@@ -70,9 +73,14 @@ export class AuthService {
 
         const { access, refresh } = await this.generateTokens(id)
 
+        const urlTag = v4()
+        const url = `${this.configService.get(`API_CLIENT_URL`)}/emailConfirms?urlTag=${urlTag}`
+
         this.addRefreshToResponse(res, refresh)
 
-        return { access }
+        await this.emailService.sendEmailWithCreateTag({ subject: "Email confirm", text: "Confirm email", to: dto.email, templateObject: { email: dto.email, action: "Confirm email", url } }, { urlTag, userId: id })
+
+        return { access, message: "Пришло письмо для подтверждения почты!" }
     }
 
     async login(dto: AuthDto, res: Response) {

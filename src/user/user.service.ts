@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateUser } from './interfaces';
 
@@ -22,5 +22,26 @@ export class UserService {
         return await this.prismaService.user.create({
             data
         })
+    }
+
+    async update(data: Object, userId: number) {
+        return await this.prismaService.user.update({
+            where: {
+                id: userId
+            },
+            data
+        })
+    }
+
+    async getProfile(userId: number) {
+        const User = await this.getById(userId)
+
+        if (User.isBanned) throw new BadRequestException(`User is banned!`)
+
+        if (!User.isEmailVerify) throw new BadRequestException(`User not has verifed email!`)
+
+        const { password, ...returnInfo } = User
+
+        return returnInfo
     }
 }
