@@ -1,0 +1,52 @@
+name: Main checks
+on: 
+  push:
+    branches: [ main ]
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    container: node:18.10.0
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD=postgres
+        ports:
+          - 5432:5432
+    strategy:
+      matrix:
+        node-version: [ 18.x ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install node js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Setup Environment 
+        run: |
+         echo "HOST=${{ secrets.HOST }}" >> .env
+         echo "PORT=${{ secrets.PORT }}" >> .env
+         echo "API_CLIENT_URL=${{ secrets.API_CLIENT_URL }}" >> .env
+         echo "API_VERISON=${{ secrets.API_VERSION }}" >> .env
+         echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+         echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+         echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+         echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> .env
+         echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+         echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+         echo "JWT_ACCESS_EXPIRES=${{ secrets.JWT_ACCESS_EXPIRES }}" >> .env
+         echo "JWT_REFRESH_EXPIRES=${{ secrets.JWT_REFRESH_EXPIRES }}" >> .env
+         echo "REFRESH_TOKEN_COOKIE_NAME=${{ secrets.REFRESH_TOKEN_COOKIE_NAME }}" >> .env
+         echo "TOKEN=${{ secrets.TOKEN }}" >> .env
+         echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> .env
+         echo "MAIL_PORT=${{ secrets.MAIL_PORT }}" >> .env
+      - name: Install dependencies
+        run: npm install
+      - name: Prisma init
+        run: npx prisma db push 
+      - name: Building project
+        run: npm run build
+      - name: Unit tests
+        run: npm run test
+      - name: E2E tests
+        run: npm run test:e2e
