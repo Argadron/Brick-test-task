@@ -9,6 +9,7 @@ import { JwtUser } from './interfaces';
 import { UserService } from '../user/user.service';
 import { EmailService } from '../email/email.service';
 import { v4 } from 'uuid';
+import { RoleEnum } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -19,11 +20,12 @@ export class AuthService {
                 private readonly emailService: EmailService
     ) {}
 
-    private async generateTokens(userId: number) {
+    private async generateTokens(userId: number, role: string) {
         const testExpires = this.configService.get("NODE_ENV") === "test" ? 50 : undefined
 
         const access = await this.jwtService.signAsync({
             id: userId,
+            role
         }, {
             expiresIn: testExpires ? testExpires : this.configService.get("JWT_ACCESS_EXPIRES")
         })
@@ -71,7 +73,7 @@ export class AuthService {
             password: await bcrypt.hash(dto.password, 3)
         })
 
-        const { access, refresh } = await this.generateTokens(id)
+        const { access, refresh } = await this.generateTokens(id, RoleEnum.USER)
 
         const urlTag = v4()
         const url = `${this.configService.get(`API_CLIENT_URL`)}/emailConfirms?urlTag=${urlTag}`
@@ -90,7 +92,7 @@ export class AuthService {
 
         if (!await bcrypt.compare(dto.password, User.password)) throw new BadRequestException("Bad password or username")
 
-        const { access, refresh } = await this.generateTokens(User.id)
+        const { access, refresh } = await this.generateTokens(User.id, User.role)
 
         this.addRefreshToResponse(res, refresh)
 
@@ -101,9 +103,9 @@ export class AuthService {
         if (!token || !token.split("")[1]) throw new UnauthorizedException("No refresh token")
 
         try {
-            const { id } = await this.jwtService.verifyAsync<JwtUser>(token)
+            const { id, role } = await this.jwtService.verifyAsync<JwtUser>(token)
 
-            const { access, refresh } = await this.generateTokens(id)
+            const { access, refresh } = await this.generateTokens(id, role)
 
             this.addRefreshToResponse(res, refresh)
 

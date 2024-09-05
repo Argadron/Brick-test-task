@@ -36,6 +36,8 @@ model Event {
   description String 
 
   users UserEvents[]
+  categoryId Int @map("category_id")
+  category Category @relation(fields: [categoryId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -61,6 +63,8 @@ model UserEvents {
 model Category {
   id Int @id @default(autoincrement())
   name String
+
+  event Event[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
