@@ -1,11 +1,14 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { CreateEvent } from './dto/create-event.dto';
-import { UpdateEvent } from './dto/update-event.dto';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class EventService {
-    constructor(private readonly prismaSerivce: PrismaService) {}
+    constructor(private readonly prismaSerivce: PrismaService,
+                private readonly categoryService: CategoryService
+    ) {}
 
     private async getByIdOrThrow(id: number) {
         const event = await this.prismaSerivce.event.findUnique({
@@ -50,8 +53,11 @@ export class EventService {
         return undefined
     }
 
-    async create(dto: CreateEvent) {
-        // СДЕЛАТЬ ПРОВЕРКУ ПО КАТЕГОРИЯМ !
+    async create(dto: CreateEventDto) {
+        const category = await this.categoryService.getById(dto.categoryId)
+
+        if (!category) throw new NotFoundException(`Category not found`)
+
         return await this.prismaSerivce.event.create({
             data: {
                ...dto
@@ -59,7 +65,7 @@ export class EventService {
         })
     }
 
-    async update(dto: UpdateEvent, id: number) {
+    async update(dto: UpdateEventDto, id: number) {
         await this.getByIdOrThrow(id)
 
         return await this.prismaSerivce.event.update({

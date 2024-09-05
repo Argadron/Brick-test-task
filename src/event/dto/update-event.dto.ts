@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsOptional, IsString, Min, MinLength } from "class-validator";
 
-export class UpdateEvent {
+export class UpdateEventDto {
     @ApiProperty({
         description: "New event name",
         type: String,

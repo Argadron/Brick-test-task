@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsString, Min, MinLength } from "class-validator";
 
-export class CreateEvent {
+export class CreateEventDto {
     @ApiProperty({
         description: "Event name",
         type: String,

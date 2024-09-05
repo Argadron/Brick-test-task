@@ -8,8 +8,8 @@ import { JwtUser } from '../auth/interfaces';
 import { Roles } from '@decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { RoleEnum } from '@prisma/client';
-import { CreateEvent } from './dto/create-event.dto';
-import { UpdateEvent } from './dto/update-event.dto';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 import { OptionalValidatorPipe } from '@pipes/optional-validator.pipe';
 import { ExcessPlantsValidatorPipe } from '@pipes/excess-plants-validator.pipe';
 
@@ -56,13 +56,14 @@ export class EventController {
   @ApiResponse({ description: "Validaition failed", status: 400, type: SwaggerBadRequest })
   @ApiResponse({ description: "Token Invalid/Unauthorized", status: 401, type: SwaggerUnauthorizedException })
   @ApiResponse({ description: "You not have access to this action", status: 403, type: SwaggerForbiddenException })
+  @ApiResponse({ description: "Category not found (by id)", status: 404, type: SwaggerNotFound })
   @ApiBearerAuth()
   @Auth()
   @Roles(RoleEnum.ADMIN)
   @UseGuards(RolesGuard)
   @UsePipes(new ValidationPipe())
   @Post(`/create`)
-  async create(@Body() dto: CreateEvent) {
+  async create(@Body() dto: CreateEventDto) {
     return await this.eventService.create(dto)
   }
 
@@ -77,9 +78,9 @@ export class EventController {
   @Roles(RoleEnum.ADMIN)
   @UseGuards(RolesGuard)
   @UsePipes(new ValidationPipe(), new OptionalValidatorPipe().check(["name", "description", "categoryId"]), 
-  new ExcessPlantsValidatorPipe().setType(UpdateEvent))
+  new ExcessPlantsValidatorPipe().setType(UpdateEventDto))
   @Put(`/update/:id`)
-  async update(@Body() dto: UpdateEvent, @Param("id", ParseIntPipe) id: number) {
+  async update(@Body() dto: UpdateEventDto, @Param("id", ParseIntPipe) id: number) {
     return await this.eventService.update(dto, id)
   }
 
