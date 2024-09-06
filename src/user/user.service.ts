@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateUser } from './interfaces';
+import { UpdateBanStatus } from './dto/update-ban-status.dto';
 
 @Injectable()
 export class UserService {
@@ -43,5 +44,22 @@ export class UserService {
         const { password, ...returnInfo } = User
 
         return returnInfo
+    }
+
+    async setBanStatus(dto: UpdateBanStatus) {
+        const User = await this.findBy({ email: dto.email })
+
+        if (!User) throw new NotFoundException(`User not found`)
+
+        await this.prismaService.user.update({
+            where: {
+                email: dto.email
+            },
+            data: {
+                isBanned: dto.banStatus
+            }
+        })
+
+        return undefined
     }
 }

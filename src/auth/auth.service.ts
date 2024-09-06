@@ -20,12 +20,13 @@ export class AuthService {
                 private readonly emailService: EmailService
     ) {}
 
-    private async generateTokens(userId: number, role: string) {
+    private async generateTokens(userId: number, role: string, isBanned: boolean) {
         const testExpires = this.configService.get("NODE_ENV") === "test" ? 50 : undefined
 
         const access = await this.jwtService.signAsync({
             id: userId,
-            role
+            role,
+            isBanned
         }, {
             expiresIn: testExpires ? testExpires : this.configService.get("JWT_ACCESS_EXPIRES")
         })
@@ -73,7 +74,7 @@ export class AuthService {
             password: await bcrypt.hash(dto.password, 3)
         })
 
-        const { access, refresh } = await this.generateTokens(id, RoleEnum.USER)
+        const { access, refresh } = await this.generateTokens(id, RoleEnum.USER, false)
 
         const urlTag = v4()
         const url = `${this.configService.get(`API_CLIENT_URL`)}/emailConfirms?urlTag=${urlTag}`
@@ -92,7 +93,7 @@ export class AuthService {
 
         if (!await bcrypt.compare(dto.password, User.password)) throw new BadRequestException("Bad password or username")
 
-        const { access, refresh } = await this.generateTokens(User.id, User.role)
+        const { access, refresh } = await this.generateTokens(User.id, User.role, User.isBanned)
 
         this.addRefreshToResponse(res, refresh)
 
@@ -103,9 +104,9 @@ export class AuthService {
         if (!token || !token.split("")[1]) throw new UnauthorizedException("No refresh token")
 
         try {
-            const { id, role } = await this.jwtService.verifyAsync<JwtUser>(token)
+            const { id, role, isBanned } = await this.jwtService.verifyAsync<JwtUser>(token)
 
-            const { access, refresh } = await this.generateTokens(id, role)
+            const { access, refresh } = await this.generateTokens(id, role, isBanned)
 
             this.addRefreshToResponse(res, refresh)
 
